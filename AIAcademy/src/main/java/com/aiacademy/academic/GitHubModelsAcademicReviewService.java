@@ -11,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
@@ -67,9 +68,26 @@ public class GitHubModelsAcademicReviewService {
 
     public AcademicReviewResponse review(AcademicReviewRequest request, AcademicReviewResponse baseline,
             List<ClaimEvidence> evidence) {
-        String content = chatCompletionContent(request, baseline, evidence);
+        String content = chatCompletionContentWithRetry(request, baseline, evidence);
         Map<String, Object> payload = parseJsonPayload(content);
         return mapReview(payload, request, baseline);
+    }
+
+    private String chatCompletionContentWithRetry(AcademicReviewRequest request, AcademicReviewResponse baseline,
+            List<ClaimEvidence> evidence) {
+        try {
+            return chatCompletionContent(request, baseline, evidence);
+        } catch (RestClientResponseException exception) {
+            if (exception.getStatusCode().value() == 429) {
+                sleepBeforeRetry();
+                try {
+                    return chatCompletionContent(request, baseline, evidence);
+                } catch (RestClientResponseException retryException) {
+                    throw sanitizedHttpException(retryException);
+                }
+            }
+            throw sanitizedHttpException(exception);
+        }
     }
 
     private String chatCompletionContent(AcademicReviewRequest request, AcademicReviewResponse baseline,
@@ -112,6 +130,25 @@ public class GitHubModelsAcademicReviewService {
             throw new IllegalStateException("empty model content");
         }
         return content;
+    }
+
+    private IllegalStateException sanitizedHttpException(RestClientResponseException exception) {
+        int statusCode = exception.getStatusCode().value();
+        String message = switch (statusCode) {
+            case 401 -> "GitHub Models từ chối token (HTTP 401). Kiểm tra GITHUB_MODELS_TOKEN/GITHUB_TOKEN.";
+            case 403 -> "GitHub Models không cho phép request này (HTTP 403). Kiểm tra quyền token hoặc quyền truy cập GitHub Models.";
+            case 429 -> "GitHub Models đang giới hạn tần suất (HTTP 429). Tạm dùng rule-based; thử lại sau vài phút.";
+            default -> "GitHub Models trả lỗi HTTP " + statusCode + ". Tạm dùng rule-based.";
+        };
+        return new IllegalStateException(message, exception);
+    }
+
+    private void sleepBeforeRetry() {
+        try {
+            Thread.sleep(1_500);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private String systemPrompt() {
