@@ -1,5 +1,6 @@
 services:
   backend:
+    container_name: academic-ai-validator-backend
     build:
       context: ./AIAcademy
     image: aiacademy-backend:latest
@@ -15,6 +16,7 @@ services:
       JAVA_OPTS: ${JAVA_OPTS:-}
 
   frontend:
+    container_name: academic-ai-validator-frontend
     build:
       context: ./frontend
       args:
