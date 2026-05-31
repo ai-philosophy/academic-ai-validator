@@ -23,3 +23,11 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+
+  cloudflare-tunnel:
+    container_name: academic-ai-validator-cloudflare
+    image: cloudflare/cloudflared
+    restart: on-failure:5
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
