@@ -12,7 +12,7 @@ jobs:
     env:
       API_BASE: ${{ secrets.API_BASE }}
       APP_CORS_ALLOWED_ORIGINS: ${{ secrets.APP_CORS_ALLOWED_ORIGINS }}
-      GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+      GITHUB_MODELS_TOKEN: ${{ secrets._GITHUB_MODELS_TOKEN }}
       ACADEMIC_EVIDENCE_ENABLED: ${{ secrets.ACADEMIC_EVIDENCE_ENABLED }}
       ACADEMIC_EVIDENCE_MAX_CLAIMS: ${{ secrets.ACADEMIC_EVIDENCE_MAX_CLAIMS }}
       ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM: ${{ secrets.ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM }}
@@ -29,6 +29,6 @@ jobs:
           username: ${{ github.actor}}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Clean Container, Image And Prepare For Deploy
-        run: docker compose -f docker-compose.prod.yaml -p academic-ai-validator down --rmi all -v
+        run: docker compose -f docker-compose.prod.yml -p academic-ai-validator down --rmi all -v
       - name: Deploy Application
-        run: docker compose -f docker-compose.prod.yaml -p academic-ai-validator up -d --build
+        run: docker compose -f docker-compose.prod.yml -p academic-ai-validator up -d --build
