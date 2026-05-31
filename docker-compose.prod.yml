@@ -3,7 +3,7 @@ services:
     build:
       context: ./AIAcademy
     image: aiacademy-backend:latest
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       PORT: 8080
       GITHUB_MODELS_ENABLED: ${GITHUB_MODELS_ENABLED:-true}
@@ -20,7 +20,7 @@ services:
       args:
         VITE_API_BASE: ${API_BASE}
     image: aiacademy-frontend:latest
-    restart: unless-stopped
+    restart: on-failure:5
     depends_on:
       - backend
 
