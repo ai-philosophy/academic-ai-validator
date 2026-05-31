@@ -14,6 +14,8 @@ services:
       ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM: ${ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM:-4}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost}
       JAVA_OPTS: ${JAVA_OPTS:-}
+    networks:
+      - internal
 
   frontend:
     container_name: academic-ai-validator-frontend
@@ -25,6 +27,8 @@ services:
     restart: on-failure:5
     depends_on:
       - backend
+    networks:
+      - internal
 
   cloudflare-tunnel:
     container_name: academic-ai-validator-cloudflare
@@ -33,3 +37,10 @@ services:
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - internal
+
+networks:
+  internal:
+    name: academic-ai-validator
+    external: true
