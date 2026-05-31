@@ -10,11 +10,14 @@ jobs:
       contents: read
       packages: write
     env:
+      API_BASE: ${{ secrets.API_BASE }}
       APP_CORS_ALLOWED_ORIGINS: ${{ secrets.APP_CORS_ALLOWED_ORIGINS }}
       GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
       ACADEMIC_EVIDENCE_ENABLED: ${{ secrets.ACADEMIC_EVIDENCE_ENABLED }}
       ACADEMIC_EVIDENCE_MAX_CLAIMS: ${{ secrets.ACADEMIC_EVIDENCE_MAX_CLAIMS }}
       ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM: ${{ secrets.ACADEMIC_EVIDENCE_MAX_SOURCES_PER_CLAIM }}
+      
+      CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
     steps:
       - name: Checkout Develop
         uses: actions/checkout@v3
